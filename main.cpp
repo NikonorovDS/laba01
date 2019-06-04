@@ -1,150 +1,111 @@
 #include <iostream>
 #include <vector>
-
+//variant 13 Nikonorov
 using namespace std;
-//функция ввода
-vector<double>
-input_numbers(size_t count) {
-    vector<double> result(count);
-    for (size_t i = 0; i < count; i++) {
-        cin >> result[i];
+
+const size_t max_width = 80;
+const size_t oformlenie = 4;
+const size_t data_width = max_width - oformlenie;
+
+int
+main()
+{
+
+    size_t raz_mas;
+    cerr << "Vvedite kolichestvo chisel" << endl;
+    cin >> raz_mas;
+
+    vector<double> massiv(raz_mas, 0);
+    cerr << "\nVvedite massiv\n";
+    for(size_t i=0; i<raz_mas; i++)
+    {
+        cin >> massiv[i];
     }
-    return result;
-}
-//конец функции ввода
+    int oc=0;
+    while (true)
+    {
+        size_t kol_stolb;
+
+        cerr << "\nVvedite kolichestvo stolb\n";
+        cin >> kol_stolb;
+
+        double max=massiv[1], min=max;
+        for (double chislo: massiv)
+        {
+            if (min > chislo)
+                min = chislo;
+            if (max < chislo)
+                max = chislo;
+        }
+        vector<size_t>stolb(kol_stolb, 0);
+
+        for (double chislo: massiv)
+        {
+            size_t f=(size_t)((chislo-min)/(max-min)*kol_stolb);
+            if (chislo == max)
+            {
+                f--;
+            };
+            stolb[f]++;
+        }
+        cerr << endl;
+
+        size_t max_stolb = stolb[0];
+        for (size_t chislo: stolb)
+        {
+            if(max_stolb < chislo)
+            {
+                max_stolb = chislo;
+            }
+        }
+        double coeff = (double)data_width  / max_stolb;
+        bool flag= false;
+        if (max_stolb > data_width)
+        {
+            flag = true;
+        }
 
 
-//функция мин и макс
-void
-find_minmax(vector<double> numbers, double& min, double& max) {
-    min = numbers[0];
-    max = numbers[0];
-    for (double number : numbers) {
-        if (number < min) {
-            min = number;
+
+        for (size_t chislo: stolb)
+        {
+            if (chislo < 10)
+            {
+                cout << " ";
+            }
+            if (chislo < 100)
+            {
+                cout << " ";
+            }
+            cout << chislo << "|";
+            size_t height;
+
+            if (flag)
+            {
+                height = (size_t)(chislo * coeff);
+            }
+            else
+            {
+                height = chislo;
+            }
+            for (size_t i = 0; i < height; i++)
+            {
+                cout << "*";
+            }
+            cout << endl;
         }
-        if (number > max) {
-            max = number;
+        cout << "dovol`ni li vi rezul`tatom?1/0?"<< endl;
+        cin >> oc;
+        if (oc == 1 )
+        {
+
+            break;
         }
+    else {
+        cout<<"Oshibka vvedite zanogo"<<endl;
     }
-}
-
-//конец функции мин и макс
-
-
-//функция подсчета количества чисел в столбцах
-vector<size_t>
-make_histogram(vector<double> numbers, size_t bin_count)
-{
-    double min, max;
-    find_minmax(numbers, min, max);
-
-    vector<size_t> bins(bin_count);
-  for (double number : numbers) {
-        size_t bin = (size_t)((number - min) / (max - min) * bin_count);
-        if (bin == bin_count) {
-            bin--;
-        }
-        bins[bin]++;
-    }
-    return bins;
-
-}
-//конец функции подсчета чисел в столбцах
-
-//функция построениягистограммы
-show_histogram_text(vector<size_t> bins)
-{
-   const size_t SCREEN_WIDTH = 80;
-    const size_t MAX_ASTERISK = SCREEN_WIDTH - 4 - 1;
-
-    size_t max_count = 0;
-    for (size_t count : bins) {
-        if (count > max_count) {
-            max_count = count;
-        }
-    }
-    const bool scaling_needed = max_count > MAX_ASTERISK;
-
-    for (size_t bin : bins) {
-        if (bin < 100) {
-            cout << ' ';
-        }
-        if (bin < 10) {
-            cout << ' ';
-        }
-        cout << bin << "|";
-
-        size_t height = bin;
-        if (scaling_needed) {
-            const double scaling_factor = (double)MAX_ASTERISK / max_count;
-            height = (size_t)(bin * scaling_factor);
-        }
-
-        for (size_t i = 0; i < height; i++) {
-            cout << '*';
-        }
-        cout << '\n';
     }
 
 
-
-}
-//конец функции построениягистограммы
-
-void
-svg_begin(double width, double height)
-{
-    cout << "<?xml version='1.0' encoding='UTF-8'?>\n";
-    cout << "<svg width='" << width << "' height='" << height << "' "
-         << "viewBox='0 0 " << width << " " << height << "' "
-         << "xmlns='http://www.w3.org/2000/svg'>\n";
 }
 
-void
-svg_end()
-{
-    cout << "</svg>\n";
-}
-
-
-void
-svg_text(double left, double baseline, string text)
-{
-    cout << "<text x='" << left << "' y='35'>anything you want</text>";
-}
-
-void
-show_histogram_svg(const vector<size_t>& bins)
-{
-    svg_begin(400, 300);
-    svg_text(20, 20, to_string(bins[0]));
-    svg_end();
-}
-
-
-
-
-
-
-
-
-
-int main() {
-
-    size_t number_count;
-    cerr << "Enter number count: ";
-    cin >> number_count;
-
-    cerr << "Enter numbers: ";
-    const auto numbers = input_numbers(number_count);
-
-    size_t bin_count;
-    cerr << "Enter column count: ";
-    cin >> bin_count;
-
-    const auto bins = make_histogram(numbers, bin_count);
-    show_histogram_svg(bins);
-
-            return 0;
-}
